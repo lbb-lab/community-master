@@ -1,0 +1,1 @@
+alter table user_info change column user_name username varchar(50)
