@@ -2,6 +2,8 @@ package life.majiang.community.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * Created by codedrinker on 2019/5/30.
  */

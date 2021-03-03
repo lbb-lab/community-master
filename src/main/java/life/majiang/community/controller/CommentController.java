@@ -7,6 +7,7 @@ import life.majiang.community.enums.CommentTypeEnum;
 import life.majiang.community.exception.CustomizeErrorCode;
 import life.majiang.community.model.Comment;
 import life.majiang.community.model.User;
+import life.majiang.community.model.UserInfo;
 import life.majiang.community.service.CommentService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +20,17 @@ import java.util.List;
 /**
  * Created by codedrinker on 2019/5/30.
  */
-@Controller
+@RestController
 public class CommentController {
 
     @Autowired
     private CommentService commentService;
 
-    @ResponseBody
-    @RequestMapping(value = "/comment", method = RequestMethod.POST)
-    public Object post(@RequestBody CommentCreateDTO commentCreateDTO,
+    @RequestMapping(value = "/comment",method = RequestMethod.POST)
+    public ResultDTO post(@RequestBody CommentCreateDTO commentCreateDTO,
                        HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute("user");
+        UserInfo user = (UserInfo) request.getSession().getAttribute("user");
+//        User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
             return ResultDTO.errorOf(CustomizeErrorCode.NO_LOGIN);
         }
@@ -44,13 +45,12 @@ public class CommentController {
         comment.setType(commentCreateDTO.getType());
         comment.setGmtModified(System.currentTimeMillis());
         comment.setGmtCreate(System.currentTimeMillis());
-        comment.setCommentator(user.getId());
+        comment.setCommentator(Long.valueOf(String.valueOf(user.getId())));
         comment.setLikeCount(0L);
         commentService.insert(comment, user);
         return ResultDTO.okOf();
     }
 
-    @ResponseBody
     @RequestMapping(value = "/comment/{id}", method = RequestMethod.GET)
     public ResultDTO<List<CommentDTO>> comments(@PathVariable(name = "id") Long id) {
         List<CommentDTO> commentDTOS = commentService.listByTargetId(id, CommentTypeEnum.COMMENT);

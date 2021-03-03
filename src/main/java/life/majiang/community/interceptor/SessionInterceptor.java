@@ -1,9 +1,12 @@
 package life.majiang.community.interceptor;
 
 import life.majiang.community.enums.AdPosEnum;
+import life.majiang.community.mapper.UserInfoMapper;
 import life.majiang.community.mapper.UserMapper;
 import life.majiang.community.model.User;
 import life.majiang.community.model.UserExample;
+import life.majiang.community.model.UserInfo;
+import life.majiang.community.model.UserInfoExample;
 import life.majiang.community.service.AdService;
 import life.majiang.community.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,8 @@ public class SessionInterceptor implements HandlerInterceptor {
     private NotificationService notificationService;
     @Autowired
     private AdService adService;
+    @Autowired
+    private UserInfoMapper userInfoMapper;
 
     @Value("${github.redirect.uri}")
     private String redirectUri;
@@ -48,14 +53,21 @@ public class SessionInterceptor implements HandlerInterceptor {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("token")) {
                     String token = cookie.getValue();
-                    UserExample userExample = new UserExample();
-                    userExample.createCriteria()
+//                    UserExample userExample = new UserExample();
+//                    userExample.createCriteria()
+//                            .andTokenEqualTo(token);
+//                    List<User> users = userMapper.selectByExample(userExample);
+
+                    UserInfoExample userInfoExample = new UserInfoExample();
+                    userInfoExample.createCriteria()
                             .andTokenEqualTo(token);
-                    List<User> users = userMapper.selectByExample(userExample);
+                    List<UserInfo> users = userInfoMapper.selectByExample(userInfoExample);
+
                     if (users.size() != 0) {
                         HttpSession session = request.getSession();
                         session.setAttribute("user", users.get(0));
-                        Long unreadCount = notificationService.unreadCount(users.get(0).getId());
+//                        Long unreadCount = notificationService.unreadCount(users.get(0).getId());
+                        Long unreadCount = notificationService.unreadCount(Long.valueOf(String.valueOf(users.get(0).getId())));
                         session.setAttribute("unreadCount", unreadCount);
                     }
                     break;

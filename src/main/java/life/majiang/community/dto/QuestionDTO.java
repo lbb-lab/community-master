@@ -1,6 +1,7 @@
 package life.majiang.community.dto;
 
 import life.majiang.community.model.User;
+import life.majiang.community.model.UserInfo;
 import lombok.Data;
 
 /**
@@ -18,5 +19,5 @@ public class QuestionDTO {
     private Integer viewCount;
     private Integer commentCount;
     private Integer likeCount;
-    private User user;
+    private UserInfo user;
 }

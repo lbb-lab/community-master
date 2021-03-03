@@ -21,6 +21,7 @@ function comment2target(targetId, type, content) {
         type: "POST",
         url: "/comment",
         contentType: 'application/json',
+        async: false,
         data: JSON.stringify({
             "parentId": targetId,
             "content": content,
