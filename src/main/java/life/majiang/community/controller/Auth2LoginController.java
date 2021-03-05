@@ -4,6 +4,7 @@ import life.majiang.community.constant.R;
 import life.majiang.community.constant.RedisConstant;
 import life.majiang.community.constant.ResultCode;
 import life.majiang.community.model.UserInfo;
+import life.majiang.community.redis.RedisRepository;
 import life.majiang.community.service.Auth2Service;
 import life.majiang.community.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,8 @@ public class Auth2LoginController {
     @Autowired
     private Auth2Service auth2Service;
 
-    private Jedis jedis = new Jedis("localhost",6379);
+    @Autowired
+    private RedisRepository redisRepository;
     /**
      * 登陆按钮跳转到login页面
      * @return
@@ -63,7 +65,7 @@ public class Auth2LoginController {
     @PostMapping("/login")
     public String login(UserInfo userInfo, Model model, HttpServletRequest request, HttpServletResponse response){
 
-        R result = auth2Service.login(userInfo,response,request,jedis);
+        R result = auth2Service.login(userInfo,response,request,redisRepository);
         log.info("login log:{}", JsonUtils.toJson(result));
 
         if (!result.getCode().equals(ResultCode.SUCCESS.getCode())){
@@ -96,7 +98,7 @@ public class Auth2LoginController {
 
         UserInfo userInfo = (UserInfo) request.getSession().getAttribute("user");
         //删除redis中的token信息缓存
-        jedis.del(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + userInfo.getToken());
+        redisRepository.getJedis().del(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + userInfo.getToken());
 
         //删除页面session中的user缓存和cookie缓存
         request.getSession().removeAttribute("user");

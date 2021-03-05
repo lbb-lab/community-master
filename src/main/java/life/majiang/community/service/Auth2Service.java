@@ -1,5 +1,8 @@
 package life.majiang.community.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.BeanProperty;
 import life.majiang.community.constant.R;
 import life.majiang.community.constant.RedisConstant;
 import life.majiang.community.constant.ResultCode;
@@ -7,9 +10,11 @@ import life.majiang.community.constant.UserConstant;
 import life.majiang.community.mapper.UserInfoMapper;
 import life.majiang.community.model.UserInfo;
 import life.majiang.community.model.UserInfoExample;
+import life.majiang.community.redis.RedisRepository;
 import life.majiang.community.utils.JsonUtils;
 import life.majiang.community.utils.Md5;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import redis.clients.jedis.Jedis;
@@ -20,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -98,7 +104,7 @@ public class Auth2Service {
     }
 
 
-    public R login(UserInfo user, HttpServletResponse response, HttpServletRequest request, Jedis jedis) {
+    public R login(UserInfo user, HttpServletResponse response, HttpServletRequest request, RedisRepository redis) {
         if (StringUtils.isBlank(user.getUsername())||
                 StringUtils.isBlank(user.getPassword())){
            return R.fail(ResultCode.USER_NAME_OR_PASSWORD_IS_NULL);
@@ -122,28 +128,39 @@ public class Auth2Service {
         //生成token
         String token = UUID.randomUUID().toString();
 
-        System.out.println(token);
-
         //更新token
         UserInfoExample example1 = new UserInfoExample();
         UserInfo userInfoToken = new UserInfo();
+        BeanUtils.copyProperties(userInfo,userInfoToken);
         userInfoToken.setToken(token);
-        userInfo.setId(userInfo.getId());
         userInfoMapper.updateByPrimaryKey(userInfoToken);
 
 
-        userInfo.setPassword(null);
+//        //信息写入redis—json字符串的形式
+//        //key:REDIS_SESSION:{TOKEN}
+//        //value:user转成json
+//        jedis.set(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token, JsonUtils.toJson(userInfo));
+//        //控制台打印redis的键值
+//        System.out.println(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token);
+//        //设置过期时间
+//        jedis.expire(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token, RedisConstant.UserInfo.SESSION_EXPIRE);
 
-        //信息写入redis
-        //key:REDIS_SESSION:{TOKEN}
-        //value:user转成json
-        jedis.set(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token, JsonUtils.toJson(userInfo));
-        //控制台打印redis的键值
+        //信息写入redis - hash的方式
+//        UserInfoExample example2 = new UserInfoExample();
+//        UserInfoExample.Criteria criteria2 = example.createCriteria();
+//        criteria2.andUsernameEqualTo(user.getUsername());
+//        UserInfo user0 = userInfoMapper.selectByExample(example2).get(0);
+
+        //密码设置null，防止泄露
+        userInfoToken.setPassword(null);
+        //信息写入redis - hash的方式
+        Map map = JSON.parseObject(JSON.toJSONString(userInfoToken),Map.class);
+        map.put("id",String.valueOf(userInfo.getId()));
+        redis.getJedis().hmset(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token,map);
         System.out.println(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token);
-        //设置过期时间
-        jedis.expire(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token, RedisConstant.UserInfo.SESSION_EXPIRE);
+        redis.getJedis().expire(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token, RedisConstant.UserInfo.SESSION_EXPIRE);
 
-        //信息写入session
+        //用户信息写入session
         userInfo.setToken(token);
         HttpSession session = request.getSession();
         session.setAttribute("user",userInfo);
@@ -151,6 +168,7 @@ public class Auth2Service {
         //写入cookie
         Cookie cookie = new Cookie("token",token);
         cookie.setMaxAge(RedisConstant.UserInfo.SESSION_EXPIRE);
+        cookie.setPath("/");
         response.addCookie(cookie);
 
         return R.success(token);

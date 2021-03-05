@@ -1,5 +1,7 @@
 package life.majiang.community.interceptor;
 
+import com.alibaba.fastjson.JSON;
+import life.majiang.community.constant.RedisConstant;
 import life.majiang.community.enums.AdPosEnum;
 import life.majiang.community.mapper.UserInfoMapper;
 import life.majiang.community.mapper.UserMapper;
@@ -7,12 +9,14 @@ import life.majiang.community.model.User;
 import life.majiang.community.model.UserExample;
 import life.majiang.community.model.UserInfo;
 import life.majiang.community.model.UserInfoExample;
+import life.majiang.community.redis.RedisRepository;
 import life.majiang.community.service.AdService;
 import life.majiang.community.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,7 +24,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by codedrinker on 2019/5/16.
@@ -36,6 +42,8 @@ public class SessionInterceptor implements HandlerInterceptor {
     private AdService adService;
     @Autowired
     private UserInfoMapper userInfoMapper;
+    @Autowired
+    private RedisRepository redisRepository;
 
     @Value("${github.redirect.uri}")
     private String redirectUri;
@@ -53,23 +61,33 @@ public class SessionInterceptor implements HandlerInterceptor {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("token")) {
                     String token = cookie.getValue();
+//                    //user表，第三方登陆方式
 //                    UserExample userExample = new UserExample();
 //                    userExample.createCriteria()
 //                            .andTokenEqualTo(token);
 //                    List<User> users = userMapper.selectByExample(userExample);
 
-                    UserInfoExample userInfoExample = new UserInfoExample();
-                    userInfoExample.createCriteria()
-                            .andTokenEqualTo(token);
-                    List<UserInfo> users = userInfoMapper.selectByExample(userInfoExample);
+//                    //userInfo表，通过查数据库的方式获取userInfo信息
+//                    UserInfoExample userInfoExample = new UserInfoExample();
+//                    userInfoExample.createCriteria()
+//                            .andTokenEqualTo(token);
+//                    List<UserInfo> users = userInfoMapper.selectByExample(userInfoExample);
 
-                    if (users.size() != 0) {
+//                    if (users.size() != 0) {
+//                        HttpSession session = request.getSession();
+//                        session.setAttribute("user", users.get(0));
+////                        Long unreadCount = notificationService.unreadCount(users.get(0).getId());
+//                        Long unreadCount = notificationService.unreadCount(Long.valueOf(String.valueOf(users.get(0).getId())));
+//                        session.setAttribute("unreadCount", unreadCount);
+//                    }
+
+                    //通过redis取值的方式
+                    Map<String,String> users =  redisRepository.getJedis().hgetAll(RedisConstant.UserInfo.REDIS_SESSION_KEY + ":" + token);
+                    if (!CollectionUtils.isEmpty(users)){
                         HttpSession session = request.getSession();
-                        session.setAttribute("user", users.get(0));
-//                        Long unreadCount = notificationService.unreadCount(users.get(0).getId());
-                        Long unreadCount = notificationService.unreadCount(Long.valueOf(String.valueOf(users.get(0).getId())));
-                        session.setAttribute("unreadCount", unreadCount);
+                        session.setAttribute("user", JSON.parseObject(JSON.toJSONString(users),UserInfo.class));
                     }
+
                     break;
                 }
             }
