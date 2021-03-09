@@ -1,14 +1,14 @@
-package life.majiang.community.test.javademo.multithreads.consumer;
+package life.majiang.community.test.multithreads.consumer;
 
 /**
  * @author: liu bin bin
  * @Date: 2021/3/4 10:46
  * @Description:
  */
-public class ConsumerLock implements Runnable{
-   private ResourceLock resource;
+public class Consumer implements Runnable{
+   private Resource resource;
 
-   public ConsumerLock(ResourceLock resource){
+   public Consumer(Resource resource){
        this.resource=resource;
    }
 

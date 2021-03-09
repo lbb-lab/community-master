@@ -1,8 +1,8 @@
-package life.majiang.community.test.javademo.multithreads;
+package life.majiang.community.test.multithreads;
 
-import life.majiang.community.test.javademo.multithreads.consumer.ConsumerLock;
-import life.majiang.community.test.javademo.multithreads.consumer.ProducerLock;
-import life.majiang.community.test.javademo.multithreads.consumer.ResourceLock;
+import life.majiang.community.test.multithreads.consumer.ConsumerLock;
+import life.majiang.community.test.multithreads.consumer.ProducerLock;
+import life.majiang.community.test.multithreads.consumer.ResourceLock;
 
 /**
  * @author: liu bin bin

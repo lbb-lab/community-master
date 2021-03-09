@@ -1,4 +1,4 @@
-package life.majiang.community.test.javademo.multithreads.consumer;
+package life.majiang.community.test.multithreads.consumer;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;

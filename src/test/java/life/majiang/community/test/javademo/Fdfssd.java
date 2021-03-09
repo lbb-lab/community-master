@@ -1,4 +1,4 @@
-package life.majiang.community;
+package life.majiang.community.test.javademo;
 
 /**
  * @author: liu bin bin

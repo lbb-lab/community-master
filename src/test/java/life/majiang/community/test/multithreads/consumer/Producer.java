@@ -1,4 +1,4 @@
-package life.majiang.community.test.javademo.multithreads.consumer;
+package life.majiang.community.test.multithreads.consumer;
 
 /**
  * @author: liu bin bin
