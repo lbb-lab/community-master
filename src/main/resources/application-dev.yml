@@ -18,6 +18,7 @@ github:
 #      这是测试5
 #      这是dev未提交测试6
 #      这是master测试6
+#      这是master测试7
 ucloud:
     ufile:
        public-key: TOKEN_f465454a-f3ab-4c9b-91a5-c7babf59cc38
