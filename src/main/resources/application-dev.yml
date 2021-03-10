@@ -10,6 +10,7 @@ github:
     redirect:
       uri: http://localhost:8887/callback
 #      这是测试
+#      这是测试2
 ucloud:
     ufile:
        public-key: TOKEN_f465454a-f3ab-4c9b-91a5-c7babf59cc38
