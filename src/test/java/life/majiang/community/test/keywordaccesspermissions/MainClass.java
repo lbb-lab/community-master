@@ -17,5 +17,7 @@ public class MainClass {
                                                               //protected方法，只有继承他的类可以访问，继承不能访问private
                                                               //不写权限关键字，默认为friendly，同包下才能访问
 //        testClass.setThreadTest();
+
+
     }
 }
