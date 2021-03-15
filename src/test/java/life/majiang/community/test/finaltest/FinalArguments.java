@@ -1,4 +1,4 @@
-package life.majiang.community.finaltest;
+package life.majiang.community.test.finaltest;
 
 /**
  * @author: liu bin bin
