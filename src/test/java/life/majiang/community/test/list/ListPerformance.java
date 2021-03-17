@@ -7,7 +7,8 @@ import java.util.*;
 /**
  * @author: liu bin bin
  * @Date: 2021/3/17 14:48
- * @Description:
+ * @Description:   进行add()以及contains()操作时，HashSet 显然要比 ArraySet 出色得多，而且性能明显与元素的多寡关系不大
+ *                 进行Iteration迭代时二者差不多
  */
 public class ListPerformance {
     private static final int REPS = 100;
